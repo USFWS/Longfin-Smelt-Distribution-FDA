@@ -7,16 +7,27 @@ library(RColorBrewer)
 
 options(scipen = 10)
 
-
+# Monthly and total indices can be downloaded from:
+# https://apps.wildlife.ca.gov/FMWT
+# Copy and save the table called "Longfin Smelt (all ages)" as FMWT_lfs_index.xlsx
+# or change the file name below:
 fmwt <- read_xlsx("./Data_Raw/FMWT_lfs_index.xlsx",
                   sheet = 1,
                   col_types = "numeric")
 names(fmwt)
 
-wyIndex <- read_xlsx("./Data_Raw/WY_Index_through2018.xlsx",
-                     sheet = 2)
+wyIndex <- download.file("https://data.cnra.ca.gov/dataset/8f7c9792-652a-4f5e-95ad-707961dfc3f5/resource/da64051a-7751-48e1-ab59-39c73a3ea52d/download/cdec-water-year-type-nov-2023.xlsx",
+                         destfile = "./Data_Raw/WY_Index.xlsx")
+# If the above line of code doesn't work (the file may cause errors when opening
+#  the downloaded file, depending on your security settings), download the
+#  water year information directly from: https://data.ca.gov/dataset/cdec-water-year-type-dataset
+wyIndex <- read_xlsx("./Data_Raw/WY_Index.xlsx",
+                     sheet = 1)
+names(wyIndex) <- c("Year", "Yr_type", "Area")
+wyIndex <- wyIndex[which(wyIndex$Area == "Sacramento Valley"),]
 
 fmwt.plot <- fmwt[fmwt$Year > 1986, ]
+
 fmwt.plot <- merge(fmwt.plot, wyIndex[, c("WY", "Yr_type")],
                    by.x = "Year", by.y = "WY",
                    all.x = TRUE)
